@@ -1,0 +1,43 @@
+function [j]=mjaccardnetf1(w1,w2)
+%This function is used to calculate the Jaccard similarity of two networks.
+%Symbols 'w1' and 'w1' represent adjacency matrices, and symbol 'j' represents jaccard similarity.
+% https://en.wikipedia.org/wiki/Jaccard_index.
+w=w1.*w2;
+s=w1+w2;
+[n1,n2]=find(s~=0);
+%w1与w2的并集;
+j=sum(sum(w))/length(n1);
+
+
+function [jd2]=netmultifractalf01(W,k,q)
+%This function is used to compute distance-based functions. 
+%W is a three-dimensional matrix, where each W(:,:,i) is an adjacency matrix corresponding to a timestamp. 
+%The symbol k represents the lag order, and the symbol q represents the order of the correlation function.
+n=size(W,3);
+nk=n-k;
+jd=zeros(nk,1);
+for i=1:nk;
+    jd(i,1)=1-mjaccardnetf1(W(:,:,i),W(:,:,i+k));
+end
+jd1=abs(jd);
+jd2= mean(jd1.^q) ;
+
+
+function [p,z]=netmultifractalf(W,k,q)
+%This function is used to calculate the Hurst exponent based on the Jaccard distance, where q is the order. 
+%The symbol k indicates the interval for choosing lag order, which is a vector, such as k=[1:1:10]'.
+%Input example:
+% q=[0.1:0.1:10]';
+% k=[1:1:10]';
+% [p,z]=netmultifractalf(T1,k,2);
+%Please cite the following papers when using these codes: 
+%Nie, C. X. (2022). Hurst analysis of dynamic networks. Chaos: An Interdisciplinary Journal of Nonlinear Science, 32(2), 023130.
+nk=size(k);
+for i=1:nk;
+    JD(i,:)=netmultifractalf01(W,k(i),q);
+end
+x=log(k);
+y=log(JD);
+z=[x,y];
+p=polyfit(x,y,1);
+
